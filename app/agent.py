@@ -68,7 +68,7 @@ Rules:
 
 # 3. Orchestrator Agent (Root Agent)
 orchestrator = Agent(
-    name="orchestrator",
+    name="dataset_docent",
     model="gemini-2.5-flash",
     instruction="""You are the Orchestrator for 'Dataset Docent'.
 Your job is to route the user's query to the correct sub-agent:
@@ -81,4 +81,4 @@ Provide a friendly onboarding experience. If they ask generic onboarding or gree
 )
 
 # 4. App Definition (Name matches folder to avoid eval conflicts)
-app = App(name="app", root_agent=orchestrator)
+app = App(name="dataset_docent", root_agent=orchestrator)

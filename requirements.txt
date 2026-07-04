@@ -1,0 +1,7 @@
+google-genai
+google-adk
+pandas
+numpy
+uvicorn
+fastapi
+python-multipart

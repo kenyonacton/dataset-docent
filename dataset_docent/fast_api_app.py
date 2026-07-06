@@ -24,16 +24,25 @@ from google.adk.cli.fast_api import get_fast_api_app
 from google.adk.runners import Runner
 from google.cloud import logging as google_cloud_logging
 
-from app.app_utils import services
-from app.app_utils.a2a import attach_a2a_routes
-from app.app_utils.telemetry import setup_telemetry
-from app.app_utils.typing import Feedback
+from dataset_docent.app_utils import services
+from dataset_docent.app_utils.a2a import attach_a2a_routes
+from dataset_docent.app_utils.telemetry import setup_telemetry
+from dataset_docent.app_utils.typing import Feedback
 
 load_dotenv()
 setup_telemetry()
-_, project_id = google.auth.default()
-logging_client = google_cloud_logging.Client()
-logger = logging_client.logger(__name__)
+try:
+    _, project_id = google.auth.default()
+    logging_client = google_cloud_logging.Client()
+    logger = logging_client.logger(__name__)
+except google.auth.exceptions.DefaultCredentialsError:
+    import logging as std_logging
+    project_id = "mock-project-id"
+    class MockLogger:
+        def log_struct(self, data, severity="INFO"):
+            std_logging.info(f"Mocked Cloud Logging: {data} [Severity: {severity}]")
+    logger = MockLogger()
+
 allow_origins = (
     os.getenv("ALLOW_ORIGINS", "").split(",") if os.getenv("ALLOW_ORIGINS") else None
 )
@@ -43,8 +52,8 @@ AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    from app.agent import app as adk_app
-    from app.agent import root_agent
+    from dataset_docent.agent import app as adk_app
+    from dataset_docent.agent import root_agent
 
     runner = Runner(
         app=adk_app,

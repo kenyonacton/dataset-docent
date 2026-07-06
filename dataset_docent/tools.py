@@ -66,6 +66,6 @@ def find_outliers(column: str) -> dict:
     std = df[column].std()
     if std == 0:
         return {"outliers": []}
-    z_scores = (df[column] - mean) / std
-    outliers_df = df[np.abs(z_scores) > 3].head(20)
+    df["z_score"] = (df[column] - mean) / std
+    outliers_df = df[np.abs(df["z_score"]) > 3].head(20)
     return {"outliers": outliers_df.to_dict(orient="records")}

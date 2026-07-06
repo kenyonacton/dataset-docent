@@ -1,10 +1,10 @@
 # SPEC: Dataset Docent
 
 ## Problem
-New analysts (or project reviewers) joining a data project spend hours reading scattered docs and poking at unfamiliar data before they can ask a single useful question. This project tests a simple idea: onboard people through conversation. An agent answers questions about the data by running analysis, and answers questions about the project by serving this spec.
+Data projects change constantly. New analysts (or project reviewers) joining a compliance data science project spend hours reading outdated wikis and querying unfamiliar datasets before they can ask useful questions. Static documentation quickly rots. We need an onboarding assistant that behaves like a docent for a living, breathing codebase, not a static museum piece. When the data or code changes, the docent's tour must change automatically.
 
 ## Solution
-A minimal multi-agent system built with Google's Agent Development Kit (ADK). The spec you are reading is both the design document and the docs agent's knowledge base. The project documents itself.
+A compliance analytics tool for exploratory data analysis (EDA) and outlier detection on healthcare compliance data. Built with Google's Agent Development Kit (ADK), its agent layer answers questions about both the data and its own design decisions. The docent reads the current spec, architecture doc, and data dynamically at question time. The spec you are reading is both the design document and the docs agent's knowledge base. The project documents itself.
 
 ## Data
 CMS Open Payments (healthcare compliance data), a small local CSV sample. Payments from drug and device companies to physicians. Chosen because it is public, real, and supports meaningful compliance questions (who gets paid, how much, and what looks unusual).
@@ -26,7 +26,8 @@ CMS Open Payments (healthcare compliance data), a small local CSV sample. Paymen
 - The Gemini API key is read from the GOOGLE_API_KEY environment variable. It never appears in code or in the repo.
 
 ## Out of scope
-Cloud deployment, BigQuery, MCP server, vector-store RAG, CI enforcement. This submission is intentionally minimal.
+Cloud deployment, BigQuery, MCP server, vector-store RAG, CI enforcement. This submission is intentionally minimal. Intent-aware change tracking (explaining why the project changed between versions, not just what changed) is the planned v2 feature.
 
 ## Success criteria
 A reviewer can clone the repo, run `adk web`, and get correct answers to: "What does this project do?", "What are the largest payments?", and "Which payments look unusual?"
+

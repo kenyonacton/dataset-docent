@@ -9,7 +9,7 @@ flowchart TD
     Orchestrator -->|delegates query| Docs[Docs Agent]
     Analyst -->|read-only| Tools[Pandas Tools]
     Tools -->|read-only| CSV[(local CSV)]
-    Docs -->|read-only| Files[SPEC.md + README.md + ARCHITECTURE.md]
+    Docs -->|read-only| Files[SPEC.md + README.md + ARCHITECTURE.md + QUESTIONS.md]
 ```
 
 ## Decisions
@@ -38,3 +38,9 @@ flowchart TD
 * **Choice**: Three distinct tools (`summary_stats`, `top_values`, and `find_outliers`).
 * **Alternative**: A general run_pandas tool executing dynamic Python queries.
 * **Rationale**: Dynamic python execution creates a dangerous sandbox breakout vector. Providing specific, narrowly bounded functions makes validation straightforward and keeps the tool inputs highly structured.
+
+### 6. Outlier Detection: Z-Score vs. IQR
+* **Choice**: Z-score method with a threshold of 3.
+* **Alternative**: Interquartile Range (IQR) method (threshold 1.5 * IQR).
+* **Rationale**: The Z-score method is highly effective for detecting extreme compliance signals in datasets where we want to measure standard deviation distance from the mean. It aligns well with regulatory outlier thresholds (e.g. highlighting values more than 3 standard deviations away), whereas IQR is more sensitive to a large volume of mild outliers in skewed distributions.
+

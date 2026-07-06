@@ -1,15 +1,16 @@
 import os
 from google.adk.agents import Agent
 from google.adk.apps import App
-from app.tools import summary_stats, top_values, find_outliers
+from dataset_docent.tools import summary_stats, top_values, find_outliers
 
 # Load Docs directly
 def get_docs_content() -> str:
-    """Helper to read SPEC.md, README.md, and ARCHITECTURE.md into string context."""
+    """Helper to read SPEC.md, README.md, ARCHITECTURE.md, and QUESTIONS.md into string context."""
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     spec_path = os.path.join(base_dir, "SPEC.md")
     readme_path = os.path.join(base_dir, "README.md")
     arch_path = os.path.join(base_dir, "ARCHITECTURE.md")
+    questions_path = os.path.join(base_dir, "QUESTIONS.md")
     
     docs_text = ""
     if os.path.exists(spec_path):
@@ -21,6 +22,9 @@ def get_docs_content() -> str:
     if os.path.exists(arch_path):
         with open(arch_path, "r") as f:
             docs_text += f"\n=== ARCHITECTURE.md ===\n{f.read()}\n"
+    if os.path.exists(questions_path):
+        with open(questions_path, "r") as f:
+            docs_text += f"\n=== QUESTIONS.md ===\n{f.read()}\n"
     return docs_text
 
 # 1. Analyst Agent
@@ -62,12 +66,13 @@ Committed Project Documents:
 Rules:
 - Do not make up answers. Only use the documents provided above.
 - Explain project decisions, roles, or setup instructions clearly.
+- Always cite the specific source file and section where the answer was found (e.g. "see ARCHITECTURE.md, Decisions" or "see QUESTIONS.md, Question 1").
 """,
         description="Answers questions about the project spec, architecture, rules, and setup.",
     )
 
 # 3. Orchestrator Agent (Root Agent)
-orchestrator = Agent(
+root_agent = Agent(
     name="dataset_docent",
     model="gemini-2.5-flash",
     instruction="""You are the Orchestrator for 'Dataset Docent'.
@@ -75,10 +80,27 @@ Your job is to route the user's query to the correct sub-agent:
 - If they ask about the data, statistical analysis, values, or outliers, delegate to the 'analyst' sub-agent.
 - If they ask about project documentation, the SPEC, how to run things, the setup, or the design, delegate to the 'docs' sub-agent.
 
-Provide a friendly onboarding experience. If they ask generic onboarding or greetings, welcome them and describe your two sub-agents.
-""",
+FIRST MESSAGE BEHAVIOR: If there are no previous assistant messages in this conversation, this is the user's first message. Begin your response with this welcome before doing anything else:
+
+'Welcome, I am Dataset Docent, a guide for a living project, not a museum piece. This is a compliance analytics tool that runs z-score outlier detection on CMS Open Payments data, with an agent layer that explains its own design decisions. I read the current spec and architecture at question time, so when the project changes, the tour changes too.
+
+Six questions to get you started:
+1. Why sub-agents instead of one agent?
+2. Why enforce security in tool code rather than agent instructions?
+3. Why load docs into context instead of a vector store?
+4. Why three narrow tools instead of one general run_pandas tool?
+5. Why Mermaid for the architecture diagram?
+6. What statistical method detects outliers, and why?
+
+You are not limited to these. Ask "what columns can I explore?" to see the available data, challenge a design decision, or ask what I refuse to do and why. To see this guide again at any time, type "help".'
+
+Then, if their first message contained an actual question, answer it or route it after the welcome. If it was just a greeting, stop after the welcome.
+
+REACCESS: If the user types "help", "menu", "instructions", or "start over" at any point, repeat the welcome above.
+
+For all other messages, route as normal: data questions to analyst, project and design questions to docs. Never use em-dashes.""",
     sub_agents=[create_analyst(), create_docs()],
 )
 
 # 4. App Definition (Name matches folder to avoid eval conflicts)
-app = App(name="dataset_docent", root_agent=orchestrator)
+app = App(name="dataset_docent", root_agent=root_agent)

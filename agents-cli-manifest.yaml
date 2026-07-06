@@ -1,6 +1,6 @@
 name: "dataset-docent"
 acli_version: "1.0.0"
-agent_directory: "app"
+agent_directory: "dataset_docent"
 region: "us-east1"
 base_template: "local_dataset-docent"
 generated_at: "2026-07-04T19:55:30.745377+00:00"
